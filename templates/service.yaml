@@ -8,8 +8,16 @@ spec:
   type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.service.port }}
-      targetPort: http
+      targetPort: mysql
       protocol: TCP
-      name: http
+      name: mysql
+    - port: 6032
+      targetPort: admin-mysql
+      protocol: TCP
+      name: admin-mysql
+    - port: 6080
+      targetPort: admin-web
+      protocol: TCP
+      name: admin-web
   selector:
     {{- include "proxysql.selectorLabels" . | nindent 4 }}
