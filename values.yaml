@@ -1,0 +1,124 @@
+# Default values for proxysql.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: proxysql/proxysql
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name:
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 6032
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# https://proxysql.com/documentation/getting-started/
+
+## Add mosquitto-exporter for Prometheus
+## https://github.com/sapcc/mosquitto-exporter
+monitoring:
+  enabled: false
+  serviceMonitor:
+    # When set true and if Prometheus Operator is installed then use a ServiceMonitor to configure scraping
+    enabled: true
+    # Set the namespace the ServiceMonitor should be deployed
+    # namespace: monitoring
+    # Set how frequently Prometheus should scrape
+    # interval: 30s
+    # Set path to beats-exporter telemtery-path
+    # telemetryPath: /metrics
+    # Set labels for the ServiceMonitor, use this to define your scrape label for Prometheus Operator
+    # labels:
+  image:
+    repository: sdurrheimer/proxysql-exporter
+    tag: v1.1.0
+    pullPolicy: IfNotPresent
+  resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 200Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 100Mi
+
+config: |-
+  datadir="/var/lib/proxysql"
+
+  admin_variables=
+  {
+      admin_credentials="admin:admin;radmin:radmin"
+      mysql_ifaces="0.0.0.0:6032"
+  }
+
+  mysql_variables=
+  {
+      threads=4
+      max_connections=2048
+      default_query_delay=0
+      default_query_timeout=36000000
+      have_compress=true
+      poll_timeout=2000
+      interfaces="0.0.0.0:6033"
+      default_schema="information_schema"
+      stacksize=1048576
+      server_version="5.5.30"
+      connect_timeout_server=3000
+      monitor_username="monitor"
+      monitor_password="monitor"
+      monitor_history=600000
+      monitor_connect_interval=60000
+      monitor_ping_interval=10000
+      monitor_read_only_interval=1500
+      monitor_read_only_timeout=500
+      ping_interval_server_msec=120000
+      ping_timeout_server=500
+      commands_stats=true
+      sessions_sort=true
+      connect_retries_on_failure=10
+  }
